@@ -1,0 +1,466 @@
+import React, { useState } from 'react';
+import { ChevronRight, ChevronLeft, Package, Sparkles, CheckCircle } from 'lucide-react';
+
+const SkincareQuestionnaire = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [showResults, setShowResults] = useState(false);
+
+  const questions = [
+    {
+      id: 'skinType',
+      title: 'Quel est votre type de peau ?',
+      category: 'VOTRE PROFIL PEAU',
+      type: 'single',
+      options: [
+        { value: 'grasse', label: 'Grasse (brillante toute la journée)' },
+        { value: 'mixte', label: 'Mixte (zone T grasse, joues normales/sèches)' },
+        { value: 'seche', label: 'Sèche (tiraillements, desquamation)' },
+        { value: 'normale', label: 'Normale (équilibrée)' },
+        { value: 'sensible', label: 'Sensible (rougeurs, réactions fréquentes)' }
+      ]
+    },
+    {
+      id: 'makeup',
+      title: 'Portez-vous du maquillage ou de la crème solaire quotidiennement ?',
+      category: 'VOTRE PROFIL PEAU',
+      type: 'single',
+      options: [
+        { value: 'maquillage_solaire', label: 'Oui, maquillage + crème solaire' },
+        { value: 'solaire_seulement', label: 'Oui, seulement crème solaire' },
+        { value: 'parfois_maquillage', label: 'Parfois du maquillage' },
+        { value: 'rarement', label: 'Rarement ou jamais' }
+      ]
+    },
+    {
+      id: 'afterCleansing',
+      title: 'Comment se sent votre peau après le nettoyage ?',
+      category: 'VOTRE PROFIL PEAU',
+      type: 'single',
+      options: [
+        { value: 'encore_grasse', label: 'Encore grasse ou pas assez propre' },
+        { value: 'parfaite', label: 'Parfaite, ni tiraillée ni grasse' },
+        { value: 'legerement_tiraillee', label: 'Légèrement tiraillée' },
+        { value: 'tres_tiraillee', label: 'Très tiraillée et inconfortable' }
+      ]
+    },
+    {
+      id: 'problems',
+      title: 'Quels sont vos problèmes prioritaires ?',
+      category: 'VOS PROBLÈMES ACTUELS',
+      type: 'multiple',
+      subtitle: '(plusieurs réponses possibles)',
+      options: [
+        { value: 'points_noirs', label: 'Points noirs et pores dilatés' },
+        { value: 'boutons', label: 'Boutons et imperfections régulières' },
+        { value: 'rougeurs', label: 'Rougeurs et irritations' },
+        { value: 'peau_terne', label: 'Peau terne, manque d\'éclat' },
+        { value: 'taches', label: 'Taches pigmentaires ou cicatrices d\'acné' },
+        { value: 'deshydratation', label: 'Déshydratation (tiraillements malgré la crème)' },
+        { value: 'texture_rugueuse', label: 'Texture rugueuse, granuleuse' },
+        { value: 'aucun', label: 'Aucun problème particulier' }
+      ]
+    },
+    {
+      id: 'skinReaction',
+      title: 'Votre peau réagit-elle souvent mal aux nouveaux produits ?',
+      category: 'VOS PROBLÈMES ACTUELS',
+      type: 'single',
+      options: [
+        { value: 'tres_souvent', label: 'Très souvent (rougeurs, boutons, irritations)' },
+        { value: 'parfois', label: 'Parfois, selon les produits' },
+        { value: 'rarement', label: 'Rarement' },
+        { value: 'jamais', label: 'Jamais, elle tolère bien tout' }
+      ]
+    },
+    {
+      id: 'vitaminC',
+      title: 'Avez-vous déjà utilisé de la vitamine C sur votre visage ?',
+      category: 'VOS PROBLÈMES ACTUELS',
+      type: 'single',
+      options: [
+        { value: 'oui_convient', label: 'Oui, et ça me convient bien' },
+        { value: 'oui_irrite', label: 'Oui, mais ça a irrité ma peau' },
+        { value: 'non_interesse', label: 'Non, mais j\'aimerais essayer' },
+        { value: 'non_pas_interesse', label: 'Non, et ça ne m\'intéresse pas' }
+      ]
+    },
+    {
+      id: 'skinFrequency',
+      title: 'À quelle fréquence votre peau "fait des siennes" (boutons, points noirs qui ressortent) ?',
+      category: 'VOS HABITUDES ACTUELLES',
+      type: 'single',
+      options: [
+        { value: 'constamment', label: 'Constamment' },
+        { value: 'plusieurs_fois', label: 'Plusieurs fois par mois' },
+        { value: 'occasionnellement', label: 'Occasionnellement' },
+        { value: 'rarement', label: 'Rarement ou jamais' }
+      ]
+    },
+    {
+      id: 'eveningSkin',
+      title: 'Le soir, votre peau vous semble :',
+      category: 'VOS HABITUDES ACTUELLES',
+      type: 'single',
+      options: [
+        { value: 'sale', label: 'Sale, avec des résidus (maquillage, pollution)' },
+        { value: 'fatiguee', label: 'Fatiguée et terne' },
+        { value: 'normale', label: 'Normale, juste besoin d\'hydratation' },
+        { value: 'irritee', label: 'Irritée ou sensible' }
+      ]
+    },
+    {
+      id: 'timeAvailable',
+      title: 'Combien de temps pouvez-vous consacrer à votre routine skincare ?',
+      category: 'VOS HABITUDES ACTUELLES',
+      type: 'single',
+      options: [
+        { value: '3-5min', label: '3-5 minutes maximum' },
+        { value: '5-10min', label: '5-10 minutes' },
+        { value: '10-15min', label: '10-15 minutes' },
+        { value: '15min+', label: 'Plus de 15 minutes, j\'aime prendre soin de moi' }
+      ]
+    }
+  ];
+
+  const handleAnswer = (questionId, value, isMultiple = false) => {
+    if (isMultiple) {
+      const currentAnswers = answers[questionId] || [];
+      if (currentAnswers.includes(value)) {
+        setAnswers({
+          ...answers,
+          [questionId]: currentAnswers.filter(item => item !== value)
+        });
+      } else {
+        setAnswers({
+          ...answers,
+          [questionId]: [...currentAnswers, value]
+        });
+      }
+    } else {
+      setAnswers({
+        ...answers,
+        [questionId]: value
+      });
+    }
+  };
+
+  const analyzeAnswers = () => {
+    const analysis = {
+      serum: '',
+      cream: '',
+      optionalProducts: []
+    };
+
+    // Logique pour le sérum
+    const isSensitiveSkin = answers.skinType === 'sensible';
+    const hasRougeurs = answers.problems?.includes('rougeurs');
+    const hasFrequentReactions = ['tres_souvent', 'parfois'].includes(answers.skinReaction);
+    const vitaminCIrritation = answers.vitaminC === 'oui_irrite';
+    const neverTriedVitaminC = ['non_interesse', 'non_pas_interesse'].includes(answers.vitaminC);
+
+    const hasTerneSkin = answers.problems?.includes('peau_terne');
+    const hasTaches = answers.problems?.includes('taches');
+    const isTolerant = ['rarement', 'jamais'].includes(answers.skinReaction);
+    const okWithVitaminC = ['oui_convient', 'non_interesse'].includes(answers.vitaminC);
+
+    if (isSensitiveSkin || hasRougeurs || hasFrequentReactions || vitaminCIrritation || neverTriedVitaminC) {
+      analysis.serum = 'ANUA Heartleaf 80% Ampoule';
+    } else if ((hasTerneSkin || hasTaches) && isTolerant && okWithVitaminC) {
+      analysis.serum = 'COSRX Vitamin C 23 Serum';
+    } else {
+      analysis.serum = 'ANUA Heartleaf 80% Ampoule'; // Par défaut
+    }
+
+    // Logique pour la crème
+    const isDryOrNormal = ['seche', 'normale'].includes(answers.skinType);
+    const hasTiraillements = ['legerement_tiraillee', 'tres_tiraillee'].includes(answers.afterCleansing);
+    const isOilyOrMixed = ['grasse', 'mixte'].includes(answers.skinType);
+    const isSensitiveWithRougeurs = answers.skinType === 'sensible' && hasRougeurs;
+
+    if (isDryOrNormal && hasTiraillements) {
+      analysis.cream = 'Beauty of Joseon Dynasty Cream';
+    } else if (isOilyOrMixed || isSensitiveWithRougeurs) {
+      analysis.cream = 'COSRX Hydrium Green Tea Gel Cream';
+    } else {
+      analysis.cream = 'COSRX Hydrium Green Tea Gel Cream'; // Par défaut
+    }
+
+    // Produits optionnels
+    const needsDoubleCleanser = (isOilyOrMixed || answers.skinType === 'mixte') && 
+                               ['maquillage_solaire', 'parfois_maquillage'].includes(answers.makeup) && 
+                               answers.afterCleansing === 'encore_grasse';
+
+    const needsEssence = answers.problems?.includes('deshydratation') && 
+                        ['seche', 'sensible'].includes(answers.skinType) && 
+                        ['10-15min', '15min+'].includes(answers.timeAvailable);
+
+    const needsBHA = answers.problems?.includes('points_noirs') && 
+                    isTolerant && 
+                    answers.problems?.includes('boutons');
+
+    const needsNightMask = (hasTerneSkin || answers.eveningSkin === 'fatiguee') && 
+                          answers.problems?.includes('deshydratation') && 
+                          answers.timeAvailable === '15min+';
+
+    if (needsDoubleCleanser) analysis.optionalProducts.push('Skin1004 Centella Oil (Double Nettoyage)');
+    if (needsEssence) analysis.optionalProducts.push('COSRX Snail 96 (Essence)');
+    if (needsBHA) analysis.optionalProducts.push('COSRX BHA Liquid (Exfoliant)');
+    if (needsNightMask) analysis.optionalProducts.push('COSRX Propolis (Masque de Nuit)');
+
+    return analysis;
+  };
+
+  const nextStep = () => {
+    if (currentStep < questions.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      setShowResults(true);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const resetQuestionnaire = () => {
+    setCurrentStep(0);
+    setAnswers({});
+    setShowResults(false);
+  };
+
+  const currentQuestion = questions[currentStep];
+  const isAnswered = currentQuestion?.type === 'multiple' ? 
+    answers[currentQuestion.id]?.length > 0 : 
+    answers[currentQuestion.id];
+
+  const progress = ((currentStep + 1) / questions.length) * 100;
+
+  if (showResults) {
+    const analysis = analyzeAnswers();
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full mb-4">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                🔍 VOTRE BOX PERSONNALISÉE
+              </h1>
+              <p className="text-gray-600">Routine optimisée selon votre profil unique</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Routine de base */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                  <Package className="w-5 h-5 mr-2 text-purple-600" />
+                  Routine de Base (6 produits)
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                    <span className="text-sm">COSRX Low pH Good Morning Gel Cleanser</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                    <span className="text-sm">TIRTIR Milk Skin Toner</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-purple-500 mr-2" />
+                    <span className="text-sm font-medium">{analysis.serum}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-blue-500 mr-2" />
+                    <span className="text-sm font-medium">{analysis.cream}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                    <span className="text-sm">TIRTIR Collagen Lifting Eye Cream</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-yellow-500 mr-2" />
+                    <span className="text-sm">Beauty of Joseon Relief Sun SPF50+</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Produits optionnels */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                  <Sparkles className="w-5 h-5 mr-2 text-blue-600" />
+                  Produits Optionnels Recommandés
+                </h3>
+                {analysis.optionalProducts.length > 0 ? (
+                  <div className="space-y-3">
+                    {analysis.optionalProducts.map((product, index) => (
+                      <div key={index} className="flex items-center">
+                        <CheckCircle className="w-4 h-4 text-blue-500 mr-2" />
+                        <span className="text-sm">{product}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-600 text-sm">
+                    Votre routine de base est parfaite pour vos besoins actuels !
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Explication personnalisée */}
+            <div className="mt-8 bg-gray-50 rounded-2xl p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Pourquoi cette sélection ?
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+                <div>
+                  <strong>Sérum choisi :</strong> {analysis.serum}
+                  <br />
+                  {analysis.serum.includes('Heartleaf') ? 
+                    'Apaisant et adapté aux peaux sensibles ou réactives' : 
+                    'Éclat et anti-taches pour peaux tolérantes'}
+                </div>
+                <div>
+                  <strong>Crème choisie :</strong> {analysis.cream}
+                  <br />
+                  {analysis.cream.includes('Dynasty') ? 
+                    'Nutrition riche pour peaux sèches/normales' : 
+                    'Texture gel légère pour peaux grasses/mixtes'}
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center mt-8">
+              <button
+                onClick={resetQuestionnaire}
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 rounded-full font-medium hover:shadow-lg transition-all duration-300"
+              >
+                Refaire le questionnaire
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 p-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full mb-4">
+            <Package className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Questionnaire Skincare
+          </h1>
+          <p className="text-gray-600">Personnalisation de votre Box Skincare</p>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mb-8">
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>Question {currentStep + 1} sur {questions.length}</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div 
+              className="bg-gradient-to-r from-pink-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Question Card */}
+        <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+          <div className="mb-6">
+            <div className="text-sm font-medium text-purple-600 mb-2">
+              {currentQuestion.category}
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {currentQuestion.title}
+            </h2>
+            {currentQuestion.subtitle && (
+              <p className="text-gray-600 text-sm">{currentQuestion.subtitle}</p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {currentQuestion.options.map((option) => {
+              const isSelected = currentQuestion.type === 'multiple' ? 
+                answers[currentQuestion.id]?.includes(option.value) : 
+                answers[currentQuestion.id] === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => handleAnswer(currentQuestion.id, option.value, currentQuestion.type === 'multiple')}
+                  className={`w-full p-4 text-left rounded-2xl border-2 transition-all duration-300 ${
+                    isSelected
+                      ? 'border-purple-500 bg-purple-50 text-purple-700'
+                      : 'border-gray-200 hover:border-purple-300 hover:bg-purple-25'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                      currentQuestion.type === 'multiple' ? 'rounded-sm' : ''
+                    } ${
+                      isSelected 
+                        ? 'border-purple-500 bg-purple-500' 
+                        : 'border-gray-300'
+                    }`}>
+                      {isSelected && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-gray-800">{option.label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <div className="flex justify-between">
+          <button
+            onClick={prevStep}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+              currentStep === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
+            }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Précédent
+          </button>
+
+          <button
+            onClick={nextStep}
+            disabled={!isAnswered}
+            className={`flex items-center px-8 py-3 rounded-full font-medium transition-all duration-300 ${
+              !isAnswered
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg'
+            }`}
+          >
+            {currentStep === questions.length - 1 ? 'Voir mes résultats' : 'Suivant'}
+            <ChevronRight className="w-5 h-5 ml-2" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SkincareQuestionnaire;
